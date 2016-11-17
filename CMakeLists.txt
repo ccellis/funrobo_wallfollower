@@ -76,3 +76,5 @@ install(DIRECTORY assets
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
   FILES_MATCHING PATTERN "*.png")
 
+add_executable(wallfollower src/wallfollower.cpp)
+target_link_libraries(wallfollower ${catkin_LIBRARIES})
