@@ -19,6 +19,8 @@ float scale_factor = 0.5;
 
 int following_right = -1;
 
+int started_following = 0;
+
 void irFCallback(const std_msgs::Float32::ConstPtr& ir_reading)
 {
     ir_f_val = ir_reading->data;
@@ -77,7 +79,6 @@ int main(int argc, char **argv)
 
         //if that there wall is too close to your front
         if (ir_f_val < 20){
-            std::cout << "Too close to front";
             std_msgs::Float32 stop;
             std_msgs::Float32 run;
 
@@ -98,14 +99,35 @@ int main(int argc, char **argv)
 
         else if (ir_l_val == 20.0 && ir_r_val == 20.0)
         {
-            right_speed.data = middle_speed;
-            left_speed.data  = middle_speed;
-            vel_r_pub.publish(right_speed);
-            vel_l_pub.publish(left_speed);
+            if (!started_following) {
+                right_speed.data = middle_speed;
+                left_speed.data = middle_speed;
+                vel_r_pub.publish(right_speed);
+                vel_l_pub.publish(left_speed);
+            }
+            else{
+                std_msgs::Float32 stop;
+                std_msgs::Float32 run;
+
+                stop.data = -10.0;
+                run.data = 20.0;
+
+                if(following_right)
+                {
+                    vel_l_pub.publish(stop);
+                    vel_r_pub.publish(run);
+                }
+                else
+                {
+                    vel_l_pub.publish(run);
+                    vel_r_pub.publish(stop);
+                }
+            }
         }
 
         else
         {
+            started_following = 1;
             if(following_right)
             {
                 float error = target_distance - ir_r_val;
